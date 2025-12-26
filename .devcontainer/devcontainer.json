@@ -4,8 +4,11 @@
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {}
 	},
-	"forwardPorts": [8080],
-	"postCreateCommand": "npm install",
+	"forwardPorts": [
+		8080
+	],
+	"postCreateCommand": "cd server && npm install",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	"customizations": {
 		"vscode": {
 			"extensions": [
