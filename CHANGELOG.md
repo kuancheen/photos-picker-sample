@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4 (Beta)] - 2024-12-27
+
+### Fixed
+- Modal no longer auto-popups on page load; only shows when user clicks "Configure" button
+- Photo metadata now shows "Image" instead of "undefined" when mimeType is missing
+
+### Changed
+- Improved sign-in UX: auto-connects if Client ID exists in localStorage
+
 ## [0.0.3 (Beta)] - 2024-12-27
 
 ### Fixed
