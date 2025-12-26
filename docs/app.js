@@ -480,7 +480,14 @@ async function uploadToYouTube(item, button) {
 
     } catch (error) {
         console.error('Upload error:', error);
-        alert(`Upload failed: ${error.message}`);
+
+        // Check if it's a CORS/fetch error
+        if (error.message.includes('fetch') || error.name === 'TypeError') {
+            alert(`❌ YouTube Upload Limitation\n\nDue to browser security restrictions (CORS), videos cannot be uploaded directly from Google Photos in the browser.\n\n✅ Solution: Use the Codespaces (server-side) version for YouTube uploads.\n\nThe server can download videos and upload to YouTube without these restrictions.`);
+        } else {
+            alert(`Upload failed: ${error.message}`);
+        }
+
         button.disabled = false;
         button.textContent = 'Upload to YouTube';
     }
