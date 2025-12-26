@@ -1,6 +1,6 @@
 {
   "name": "picker-server-auth",
-  "version": "1.0.0",
+  "version": "0.2.1",
   "description": "Google Photos Picker API Sample",
   "private": true,
   "license": "Apache-2.0",
