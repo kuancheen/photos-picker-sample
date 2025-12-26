@@ -49,10 +49,6 @@ function showConfigModal() {
 
 // Close configuration modal
 function closeConfigModal() {
-    if (!clientId) {
-        alert('You must configure a Client ID to use this app.');
-        return;
-    }
     document.getElementById('config-modal').classList.add('hidden');
 }
 
