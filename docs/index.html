@@ -19,11 +19,45 @@
         <div id="auth-section" class="card">
             <h2>Sign In</h2>
             <p>Sign in with your Google account to access your photos.</p>
-            <div id="g_id_onload" data-client_id="YOUR_CLIENT_ID" data-callback="handleCredentialResponse"
-                data-auto_prompt="false">
+            <p class="config-hint">
+                Don't have credentials?
+                <a href="#" id="config-btn" class="config-link">Configure Client ID</a>
+            </p>
+            <div id="g_id_onload" data-callback="handleCredentialResponse" data-auto_prompt="false">
             </div>
             <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
                 data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left">
+            </div>
+        </div>
+
+        <!-- Configuration Modal -->
+        <div id="config-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>⚙️ Configure Google OAuth</h2>
+                <p>Enter your Google OAuth Client ID to use this app.</p>
+
+                <div class="form-group">
+                    <label for="client-id-input">Client ID</label>
+                    <input type="text" id="client-id-input" placeholder="123456789-abc123.apps.googleusercontent.com"
+                        class="input-field">
+                </div>
+
+                <div class="help-text">
+                    <p><strong>How to get a Client ID:</strong></p>
+                    <ol>
+                        <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a>
+                        </li>
+                        <li>Create a project and enable "Photos Picker API"</li>
+                        <li>Create OAuth 2.0 credentials (Web application)</li>
+                        <li>Add authorized origin: <code>https://kuancheen.github.io</code></li>
+                        <li>Copy the Client ID and paste it above</li>
+                    </ol>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="save-config-btn" class="btn-primary">Save & Continue</button>
+                    <button id="close-modal-btn" class="btn-secondary">Cancel</button>
+                </div>
             </div>
         </div>
 

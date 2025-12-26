@@ -2,25 +2,82 @@
 let accessToken = null;
 let currentSession = null;
 let tokenClient = null;
+let clientId = null;
+
+// Configuration
+const CONFIG = {
+    scope: 'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
+    apiEndpoint: 'https://photospicker.googleapis.com/v1'
+};
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Check for stored session
-    const storedToken = sessionStorage.getItem('access_token');
-    if (storedToken) {
-        accessToken = storedToken;
-        initializeApp();
-    }
+    // Check for stored client ID
+    clientId = localStorage.getItem('google_client_id');
 
-    // Initialize Google Identity Services
-    initializeGIS();
+    if (!clientId) {
+        showConfigModal();
+    } else {
+        // Check for stored session
+        const storedToken = sessionStorage.getItem('access_token');
+        if (storedToken) {
+            accessToken = storedToken;
+            initializeApp();
+        }
+
+        // Initialize Google Identity Services
+        initializeGIS();
+    }
 
     // Event listeners
     document.getElementById('sign-out-btn')?.addEventListener('click', signOut);
     document.getElementById('open-picker-btn')?.addEventListener('click', openPhotoPicker);
+    document.getElementById('config-btn')?.addEventListener('click', showConfigModal);
+    document.getElementById('save-config-btn')?.addEventListener('click', saveConfig);
+    document.getElementById('close-modal-btn')?.addEventListener('click', closeConfigModal);
 });
+
+// Show configuration modal
+function showConfigModal() {
+    const modal = document.getElementById('config-modal');
+    const input = document.getElementById('client-id-input');
+    input.value = clientId || '';
+    modal.classList.remove('hidden');
+}
+
+// Close configuration modal
+function closeConfigModal() {
+    if (!clientId) {
+        alert('You must configure a Client ID to use this app.');
+        return;
+    }
+    document.getElementById('config-modal').classList.add('hidden');
+}
+
+// Save configuration
+function saveConfig() {
+    const input = document.getElementById('client-id-input');
+    const newClientId = input.value.trim();
+
+    if (!newClientId) {
+        alert('Please enter a valid Client ID');
+        return;
+    }
+
+    if (!newClientId.endsWith('.apps.googleusercontent.com')) {
+        alert('Client ID should end with .apps.googleusercontent.com');
+        return;
+    }
+
+    clientId = newClientId;
+    localStorage.setItem('google_client_id', clientId);
+    closeConfigModal();
+
+    // Reload to initialize with new client ID
+    location.reload();
+}
 
 // Initialize Google Identity Services
 function initializeGIS() {
@@ -29,8 +86,13 @@ function initializeGIS() {
         return;
     }
 
+    if (!clientId) {
+        console.error('Client ID not configured');
+        return;
+    }
+
     tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CONFIG.clientId,
+        client_id: clientId,
         scope: CONFIG.scope,
         callback: (response) => {
             if (response.access_token) {
