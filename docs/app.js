@@ -276,13 +276,16 @@ async function displaySelectedPhotos() {
 
         mediaItems.forEach(item => {
             console.log('Processing item:', JSON.stringify(item, null, 2));
+
             const photoCard = document.createElement('div');
             photoCard.className = 'photo-card';
 
             const img = document.createElement('img');
-            // Check if baseUrl exists
-            if (item.baseUrl) {
-                img.src = `${item.baseUrl}=w300-h300`;
+            // Check if mediaFile.baseUrl exists (Photos Picker API structure)
+            const baseUrl = item.mediaFile?.baseUrl || item.baseUrl;
+
+            if (baseUrl) {
+                img.src = `${baseUrl}=w300-h300`;
             } else {
                 // Fallback: show a placeholder or error
                 console.error('No baseUrl for item:', item);
@@ -298,7 +301,7 @@ async function displaySelectedPhotos() {
             info.className = 'photo-info';
             info.innerHTML = `
                 <p><strong>${item.filename || 'Untitled'}</strong></p>
-                <p class="photo-meta">${item.mimeType || 'Image'}</p>
+                <p class="photo-meta">${item.mimeType || item.type || 'Image'}</p>
             `;
 
             photoCard.appendChild(img);
