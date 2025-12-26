@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sign-out-btn')?.addEventListener('click', signOut);
     document.getElementById('open-picker-btn')?.addEventListener('click', openPhotoPicker);
     document.getElementById('save-config-btn')?.addEventListener('click', saveConfig);
+    document.getElementById('clear-config-btn')?.addEventListener('click', clearConfig);
 });
 
 // Show configuration modal
@@ -94,6 +95,15 @@ function showMessage(text, type) {
     message.textContent = text;
     message.className = `config-message ${type}`;
     message.classList.remove('hidden');
+}
+
+// Clear configuration
+function clearConfig() {
+    if (confirm('Are you sure you want to clear your Client ID configuration? You will need to re-enter it.')) {
+        localStorage.removeItem('google_client_id');
+        sessionStorage.removeItem('access_token');
+        location.reload();
+    }
 }
 
 // Wait for Google Identity Services script to load

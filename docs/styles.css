@@ -180,10 +180,25 @@ footer {
 footer a {
     color: var(--primary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color 0.2s;
 }
 
 footer a:hover {
+    color: var(--primary-dark);
+}
+
+.btn-link-footer {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.btn-link-footer:hover {
     color: var(--primary-dark);
 }
 
