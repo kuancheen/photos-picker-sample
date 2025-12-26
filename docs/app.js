@@ -262,6 +262,8 @@ async function displaySelectedPhotos() {
         const data = await response.json();
         const mediaItems = data.mediaItems || [];
 
+        console.log('Media items received:', mediaItems);
+
         if (mediaItems.length === 0) {
             alert('No photos selected.');
             return;
@@ -272,12 +274,25 @@ async function displaySelectedPhotos() {
         grid.innerHTML = '';
 
         mediaItems.forEach(item => {
+            console.log('Processing item:', item);
+
             const photoCard = document.createElement('div');
             photoCard.className = 'photo-card';
 
             const img = document.createElement('img');
-            img.src = `${item.baseUrl}=w300-h300`;
+            // Check if baseUrl exists
+            if (item.baseUrl) {
+                img.src = `${item.baseUrl}=w300-h300`;
+            } else {
+                // Fallback: show a placeholder or error
+                console.error('No baseUrl for item:', item);
+                img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" fill="%23999" font-size="12">No Image</text></svg>';
+            }
             img.alt = item.filename || 'Photo';
+            img.onerror = () => {
+                console.error('Failed to load image:', img.src);
+                img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" fill="%23999" font-size="12">Error</text></svg>';
+            };
 
             const info = document.createElement('div');
             info.className = 'photo-info';
