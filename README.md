@@ -1,5 +1,5 @@
 # Google Photos Picker Sample App
-![Version](https://img.shields.io/badge/version-v0.1.1%20(Beta)-blue)
+![Version](https://img.shields.io/badge/version-v0.1.2%20(Beta)-blue)
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)
 ![Semantic Versioning](https://img.shields.io/badge/semver-2.0.0-blue)
 ![Views](https://hits.sh/kuancheen.github.io/photos-picker-sample.svg?view=today-total&style=flat&label=👁️%20Views&extraCount=0&color=6366f1)

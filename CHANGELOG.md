@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2 (Beta)] - 2024-12-27
+
+### Fixed
+- Added required `X-Upload-Content-Type` and `X-Upload-Content-Length` headers for YouTube resumable upload
+- Improved error messages with helpful troubleshooting steps for common YouTube API errors
+
 ## [0.1.1 (Beta)] - 2024-12-27
 
 ### Fixed
