@@ -48,7 +48,8 @@ config.port = 8080;
 // The scopes to request.
 config.scopes = [
   "profile",
-  "https://www.googleapis.com/auth/photospicker.mediaitems.readonly"
+  "https://www.googleapis.com/auth/photospicker.mediaitems.readonly",
+  "https://www.googleapis.com/auth/youtube.upload"
 ];
 
 
@@ -59,7 +60,7 @@ config.scopes = [
 try {
   // Don't check config-test.cjs into source control
   config = require("./config-test.cjs").config
-} catch(e) {
+} catch (e) {
   // no override
 }
 exports.config = config
