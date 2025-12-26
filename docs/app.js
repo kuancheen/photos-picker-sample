@@ -390,7 +390,7 @@ async function uploadToYouTube(item, button) {
     try {
         // Step 1: Download video from Google Photos
         console.log('Downloading video from Google Photos...');
-        const videoResponse = await fetch(baseUrl, {
+        const videoResponse = await fetch(`${baseUrl}=dv`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`
             }
