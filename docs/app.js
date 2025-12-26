@@ -6,8 +6,9 @@ let clientId = null;
 
 // Configuration
 const CONFIG = {
-    scope: 'https://www.googleapis.com/auth/photospicker.mediaitems.readonly',
-    apiEndpoint: 'https://photospicker.googleapis.com/v1'
+    scope: 'https://www.googleapis.com/auth/photospicker.mediaitems.readonly https://www.googleapis.com/auth/youtube.upload',
+    apiEndpoint: 'https://photospicker.googleapis.com/v1',
+    youtubeApiEndpoint: 'https://www.googleapis.com/youtube/v3'
 };
 
 // Initialize on page load
@@ -338,14 +339,127 @@ async function displaySelectedPhotos() {
 
             photoCard.appendChild(img);
             photoCard.appendChild(info);
+
+            // Add upload button for videos
+            if (item.type === 'VIDEO') {
+                const uploadBtn = document.createElement('button');
+                uploadBtn.className = 'btn-upload';
+                uploadBtn.textContent = '📤 Upload to YouTube';
+                uploadBtn.addEventListener('click', () => uploadToYouTube(item, uploadBtn));
+                photoCard.appendChild(uploadBtn);
+            }
+
             grid.appendChild(photoCard);
         });
 
-        document.getElementById('selected-photos').classList.remove('hidden');
-
+        document.getElementById('photos-section').classList.remove('hidden');
     } catch (error) {
         console.error('Error displaying photos:', error);
-        alert('Failed to load selected photos.');
+        alert('Failed to display photos. Please try again.');
+    }
+}
+
+// Upload video to YouTube
+async function uploadToYouTube(item, button) {
+    if (item.type !== 'VIDEO') {
+        alert('Only videos can be uploaded to YouTube');
+        return;
+    }
+
+    const baseUrl = item.mediaFile?.baseUrl;
+    if (!baseUrl) {
+        alert('Video URL not available');
+        return;
+    }
+
+    // Get metadata from user
+    const title = prompt('Enter video title:', item.mediaFile?.filename || 'Untitled Video');
+    if (!title) return;
+
+    const description = prompt('Enter video description (optional):', '');
+    const privacy = prompt('Enter privacy status (public/unlisted/private):', 'unlisted');
+
+    if (!['public', 'unlisted', 'private'].includes(privacy.toLowerCase())) {
+        alert('Invalid privacy status. Must be public, unlisted, or private.');
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Uploading...';
+
+    try {
+        // Step 1: Download video from Google Photos
+        console.log('Downloading video from Google Photos...');
+        const videoResponse = await fetch(baseUrl, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!videoResponse.ok) {
+            throw new Error('Failed to download video from Google Photos');
+        }
+
+        const videoBlob = await videoResponse.blob();
+        console.log('Video downloaded:', videoBlob.size, 'bytes');
+
+        // Step 2: Initialize resumable upload to YouTube
+        const metadata = {
+            snippet: {
+                title: title,
+                description: description || '',
+                categoryId: '22' // People & Blogs
+            },
+            status: {
+                privacyStatus: privacy.toLowerCase()
+            }
+        };
+
+        const initResponse = await fetch(`${CONFIG.youtubeApiEndpoint}/videos?uploadType=resumable&part=snippet,status`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(metadata)
+        });
+
+        if (!initResponse.ok) {
+            const error = await initResponse.json();
+            throw new Error(`YouTube API error: ${error.error?.message || 'Unknown error'}`);
+        }
+
+        const uploadUrl = initResponse.headers.get('Location');
+        if (!uploadUrl) {
+            throw new Error('No upload URL received from YouTube');
+        }
+
+        // Step 3: Upload video file
+        console.log('Uploading to YouTube...');
+        const uploadResponse = await fetch(uploadUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': item.mediaFile?.mimeType || 'video/mp4'
+            },
+            body: videoBlob
+        });
+
+        if (!uploadResponse.ok) {
+            throw new Error('Failed to upload video to YouTube');
+        }
+
+        const result = await uploadResponse.json();
+        console.log('Upload successful:', result);
+
+        alert(`✓ Video uploaded successfully!\nVideo ID: ${result.id}\nTitle: ${title}`);
+        button.textContent = '✓ Uploaded';
+        button.style.background = '#22c55e';
+
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert(`Upload failed: ${error.message}`);
+        button.disabled = false;
+        button.textContent = 'Upload to YouTube';
     }
 }
 
