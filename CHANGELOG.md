@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0 (Beta)] - 2024-12-27
+
+### Added
+- **YouTube Upload Feature** for GitHub Pages version
+- Upload videos from Google Photos directly to YouTube
+- OAuth scope for YouTube Data API v3
+- Upload buttons on video cards with YouTube red theme
+- Resumable upload protocol for large videos
+- User prompts for video title, description, and privacy settings
+
 ## [0.0.9 (Beta)] - 2024-12-27
 
 ### Added
