@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
         }
 
-        // Initialize Google Identity Services
-        initializeGIS();
+        // Wait for Google Identity Services to load, then initialize
+        waitForGoogleScript();
     }
 
     // Event listeners
@@ -75,11 +75,19 @@ function saveConfig() {
     location.reload();
 }
 
+// Wait for Google Identity Services script to load
+function waitForGoogleScript() {
+    if (typeof google !== 'undefined' && google.accounts) {
+        initializeGIS();
+    } else {
+        setTimeout(waitForGoogleScript, 100);
+    }
+}
+
 // Initialize Google Identity Services
 function initializeGIS() {
     if (typeof google === 'undefined') {
         console.error('Google Identity Services not loaded');
-        setTimeout(initializeGIS, 100); // Retry
         return;
     }
 
