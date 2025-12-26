@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1 (Beta)] - 2024-12-27
+
+### Experimental
+- Added multi-attempt approach to bypass CORS for client-side video downloads
+- Tries 3 different methods: baseUrl (no params), baseUrl=dv, baseUrl=m37
+- Logs detailed attempt results to console for debugging
+
 ## [0.2.0 (Beta)] - 2024-12-27
 
 ### Added
