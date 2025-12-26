@@ -83,6 +83,7 @@ function saveConfig() {
 function initializeGIS() {
     if (typeof google === 'undefined') {
         console.error('Google Identity Services not loaded');
+        setTimeout(initializeGIS, 100); // Retry
         return;
     }
 
@@ -91,6 +92,7 @@ function initializeGIS() {
         return;
     }
 
+    // Initialize token client
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: CONFIG.scope,
@@ -102,6 +104,24 @@ function initializeGIS() {
             }
         },
     });
+
+    // Render the sign-in button
+    google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleCredentialResponse
+    });
+
+    google.accounts.id.renderButton(
+        document.getElementById('signin-button-container'),
+        {
+            type: 'standard',
+            size: 'large',
+            theme: 'outline',
+            text: 'sign_in_with',
+            shape: 'rectangular',
+            logo_alignment: 'left'
+        }
+    );
 }
 
 // Handle credential response from Google Sign-In
