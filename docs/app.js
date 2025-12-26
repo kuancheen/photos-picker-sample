@@ -17,24 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check for stored client ID
     clientId = localStorage.getItem('google_client_id');
 
-    if (!clientId) {
-        showConfigModal();
-    } else {
-        // Check for stored session
-        const storedToken = sessionStorage.getItem('access_token');
-        if (storedToken) {
-            accessToken = storedToken;
-            initializeApp();
-        }
+    // Check for stored session
+    const storedToken = sessionStorage.getItem('access_token');
+    if (storedToken && clientId) {
+        accessToken = storedToken;
+        initializeApp();
+    }
 
-        // Wait for Google Identity Services to load, then initialize
+    // If client ID exists, initialize Google Sign-In button
+    if (clientId) {
         waitForGoogleScript();
     }
 
     // Event listeners
     document.getElementById('sign-out-btn')?.addEventListener('click', signOut);
     document.getElementById('open-picker-btn')?.addEventListener('click', openPhotoPicker);
-    document.getElementById('config-btn')?.addEventListener('click', showConfigModal);
+    document.getElementById('config-btn-link')?.addEventListener('click', showConfigModal);
     document.getElementById('save-config-btn')?.addEventListener('click', saveConfig);
     document.getElementById('close-modal-btn')?.addEventListener('click', closeConfigModal);
 });
@@ -262,7 +260,7 @@ async function displaySelectedPhotos() {
             info.className = 'photo-info';
             info.innerHTML = `
                 <p><strong>${item.filename || 'Untitled'}</strong></p>
-                <p class="photo-meta">${item.mimeType}</p>
+                <p class="photo-meta">${item.mimeType || 'Image'}</p>
             `;
 
             photoCard.appendChild(img);
