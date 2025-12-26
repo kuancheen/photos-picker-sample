@@ -274,34 +274,56 @@ async function displaySelectedPhotos() {
         const grid = document.getElementById('photos-grid');
         grid.innerHTML = '';
 
-        mediaItems.forEach(item => {
+        mediaItems.forEach(async (item) => {
             console.log('Processing item:', JSON.stringify(item, null, 2));
 
             const photoCard = document.createElement('div');
             photoCard.className = 'photo-card';
 
             const img = document.createElement('img');
+            img.alt = item.mediaFile?.filename || 'Photo';
+
             // Check if mediaFile.baseUrl exists (Photos Picker API structure)
             const baseUrl = item.mediaFile?.baseUrl || item.baseUrl;
 
             if (baseUrl) {
-                img.src = `${baseUrl}=w300-h300`;
+                try {
+                    // Fetch the image with authentication
+                    const imageUrl = `${baseUrl}=w300-h300`;
+                    const response = await fetch(imageUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const blobUrl = URL.createObjectURL(blob);
+                        img.src = blobUrl;
+
+                        // Clean up blob URL when image is removed
+                        img.addEventListener('load', () => {
+                            // Image loaded successfully
+                        });
+                    } else {
+                        console.error('Failed to fetch image:', response.status, response.statusText);
+                        img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" fill="%23999" font-size="12">Error</text></svg>';
+                    }
+                } catch (error) {
+                    console.error('Error loading image:', error);
+                    img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" fill="%23999" font-size="12">Error</text></svg>';
+                }
             } else {
-                // Fallback: show a placeholder or error
+                // Fallback: show a placeholder
                 console.error('No baseUrl for item:', item);
                 img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" fill="%23999" font-size="12">No Image</text></svg>';
             }
-            img.alt = item.filename || 'Photo';
-            img.onerror = () => {
-                console.error('Failed to load image:', img.src);
-                img.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" fill="%23999" font-size="12">Error</text></svg>';
-            };
 
             const info = document.createElement('div');
             info.className = 'photo-info';
             info.innerHTML = `
-                <p><strong>${item.filename || 'Untitled'}</strong></p>
-                <p class="photo-meta">${item.mimeType || item.type || 'Image'}</p>
+                <p><strong>${item.mediaFile?.filename || 'Untitled'}</strong></p>
+                <p class="photo-meta">${item.mediaFile?.mimeType || item.type || 'Image'}</p>
             `;
 
             photoCard.appendChild(img);
