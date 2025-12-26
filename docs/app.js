@@ -388,20 +388,75 @@ async function uploadToYouTube(item, button) {
     button.textContent = 'Uploading...';
 
     try {
-        // Step 1: Download video from Google Photos
-        console.log('Downloading video from Google Photos...');
-        const videoResponse = await fetch(`${baseUrl}=dv`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
+        // Step 1: Try multiple approaches to download video
+        console.log('Attempting to download video from Google Photos...');
 
-        if (!videoResponse.ok) {
-            throw new Error('Failed to download video from Google Photos');
+        let videoBlob = null;
+        let downloadMethod = '';
+
+        // Attempt 1: Try baseUrl without =dv (might be streamable without redirect)
+        try {
+            console.log('Attempt 1: Trying baseUrl without =dv parameter...');
+            const response1 = await fetch(baseUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (response1.ok) {
+                videoBlob = await response1.blob();
+                downloadMethod = 'baseUrl (no params)';
+                console.log('✓ Success with baseUrl (no params):', videoBlob.size, 'bytes');
+            }
+        } catch (e) {
+            console.log('✗ Attempt 1 failed:', e.message);
         }
 
-        const videoBlob = await videoResponse.blob();
-        console.log('Video downloaded:', videoBlob.size, 'bytes');
+        // Attempt 2: Try with =dv parameter (will likely fail with CORS)
+        if (!videoBlob) {
+            try {
+                console.log('Attempt 2: Trying baseUrl=dv...');
+                const response2 = await fetch(`${baseUrl}=dv`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (response2.ok) {
+                    videoBlob = await response2.blob();
+                    downloadMethod = 'baseUrl=dv';
+                    console.log('✓ Success with baseUrl=dv:', videoBlob.size, 'bytes');
+                }
+            } catch (e) {
+                console.log('✗ Attempt 2 failed (expected CORS):', e.message);
+            }
+        }
+
+        // Attempt 3: Try with different video parameters
+        if (!videoBlob) {
+            try {
+                console.log('Attempt 3: Trying baseUrl=m37 (mobile format)...');
+                const response3 = await fetch(`${baseUrl}=m37`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (response3.ok) {
+                    videoBlob = await response3.blob();
+                    downloadMethod = 'baseUrl=m37';
+                    console.log('✓ Success with baseUrl=m37:', videoBlob.size, 'bytes');
+                }
+            } catch (e) {
+                console.log('✗ Attempt 3 failed:', e.message);
+            }
+        }
+
+        if (!videoBlob) {
+            throw new Error('All download attempts failed due to CORS restrictions');
+        }
+
+        console.log(`Video downloaded successfully using: ${downloadMethod}`);
 
         // Step 2: Initialize resumable upload to YouTube
         const metadata = {
