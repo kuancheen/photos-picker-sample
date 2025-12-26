@@ -46,7 +46,18 @@ This repository contains **two versions** of the same Google Photos Picker sampl
    - Go to Settings > Pages > Source: "Deploy from a branch" > Branch: `main` > Folder: `/docs`
    - Copy `docs/config-template.js` to `docs/config.js`
    - Add your OAuth Client ID to `docs/config.js`
+   - Add your OAuth Client ID to `docs/config.js`
    - Commit and push
+
+### 📹 YouTube Upload Setup
+
+To enable "Upload to YouTube" functionality:
+
+1. **Enable API**: Enable "YouTube Data API v3" in Google Cloud Console
+2. **Add Scopes**: Add `https://www.googleapis.com/auth/youtube.upload` to your OAuth consent screen
+3. **Re-authorize**: If you've used the app before, sign out and sign back in to grant the new permission
+
+> **Note**: For the GitHub Pages (client-side) version, video uploads may be limited by browser security (CORS). For full upload capabilities, use the Codespaces (server-side) version.
 
 ### Option B: Codespaces (For Development)
 
