@@ -419,14 +419,30 @@ async function uploadToYouTube(item, button) {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Upload-Content-Type': item.mediaFile?.mimeType || 'video/mp4',
+                'X-Upload-Content-Length': videoBlob.size.toString()
             },
             body: JSON.stringify(metadata)
         });
 
         if (!initResponse.ok) {
-            const error = await initResponse.json();
-            throw new Error(`YouTube API error: ${error.error?.message || 'Unknown error'}`);
+            const errorText = await initResponse.text();
+            let errorMessage = 'Unknown error';
+            try {
+                const error = JSON.parse(errorText);
+                errorMessage = error.error?.message || errorText;
+
+                // Check for common errors
+                if (errorMessage.includes('insufficient') || errorMessage.includes('scope')) {
+                    errorMessage += '\n\nPlease:\n1. Enable YouTube Data API v3 in Google Cloud Console\n2. Clear your config and sign in again to get YouTube permissions';
+                } else if (errorMessage.includes('quota')) {
+                    errorMessage += '\n\nYouTube API quota exceeded. Try again tomorrow.';
+                }
+            } catch (e) {
+                errorMessage = errorText;
+            }
+            throw new Error(`YouTube API error: ${errorMessage}`);
         }
 
         const uploadUrl = initResponse.headers.get('Location');
