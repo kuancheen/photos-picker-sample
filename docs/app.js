@@ -352,7 +352,7 @@ async function displaySelectedPhotos() {
             grid.appendChild(photoCard);
         });
 
-        document.getElementById('photos-section').classList.remove('hidden');
+        document.getElementById('selected-photos').classList.remove('hidden');
     } catch (error) {
         console.error('Error displaying photos:', error);
         alert('Failed to display photos. Please try again.');
