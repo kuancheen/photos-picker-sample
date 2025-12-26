@@ -41,7 +41,8 @@ import { fileURLToPath } from 'url';
 const app = express();
 const fileStore = sessionFileStore(session);
 const server = http.Server(app);
-import axios from 'axios'
+import axios from 'axios';
+import { google } from 'googleapis';
 
 
 // Use the EJS template engine
@@ -307,6 +308,83 @@ app.post("/video", async (req, res) => {
   })
 
 })
+
+
+// POST request to upload video to YouTube
+app.post("/upload-to-youtube", async (req, res) => {
+  try {
+    const { baseUrl, title, description, privacy } = req.body;
+
+    if (!baseUrl || !title) {
+      return res.status(400).send({ error: 'Missing required fields: baseUrl and title' });
+    }
+
+    // Step 1: Download video from Google Photos
+    console.log('Downloading video from Google Photos...');
+    const videoUrl = `${baseUrl}=dv`;
+    const videoResponse = await fetch(videoUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${req.user.token}`,
+      },
+    });
+
+    if (!videoResponse.ok) {
+      throw new Error('Failed to download video from Google Photos');
+    }
+
+    const videoBuffer = await videoResponse.arrayBuffer();
+    const videoStream = stream.Readable.from(Buffer.from(videoBuffer));
+    console.log('Video downloaded:', videoBuffer.byteLength, 'bytes');
+
+    // Step 2: Set up YouTube API client
+    const youtube = google.youtube({
+      version: 'v3',
+      auth: new google.auth.OAuth2()
+    });
+
+    // Set the access token
+    youtube.context._options.auth.setCredentials({
+      access_token: req.user.token
+    });
+
+    // Step 3: Upload to YouTube
+    console.log('Uploading to YouTube...');
+    const uploadResponse = await youtube.videos.insert({
+      part: ['snippet', 'status'],
+      requestBody: {
+        snippet: {
+          title: title,
+          description: description || '',
+          categoryId: '22' // People & Blogs
+        },
+        status: {
+          privacyStatus: privacy || 'unlisted'
+        }
+      },
+      media: {
+        body: videoStream
+      }
+    });
+
+    console.log('Upload successful:', uploadResponse.data.id);
+    res.send({
+      success: true,
+      videoId: uploadResponse.data.id,
+      title: title
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).send({
+      error: error.message || 'Failed to upload video to YouTube'
+    });
+  }
+});
+
+
+
+
 
 
 
