@@ -415,6 +415,13 @@ async function uploadToYouTube(item, button) {
             }
         };
 
+        console.log('YouTube upload metadata:', JSON.stringify(metadata, null, 2));
+        console.log('Video info:', {
+            mimeType: item.mediaFile?.mimeType,
+            size: videoBlob.size,
+            filename: item.mediaFile?.filename
+        });
+
         const initResponse = await fetch(`${CONFIG.youtubeApiEndpoint}/videos?uploadType=resumable&part=snippet,status`, {
             method: 'POST',
             headers: {
