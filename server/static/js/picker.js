@@ -8,28 +8,28 @@ const showQRCode = () => {
     },
     json: true
   }).then((response) => response.json())
-  .then((responseData) => {
+    .then((responseData) => {
 
-    if(responseData["error"]) {
-      console.log("ERROR: ", responseData)
-      // The cloud project may not be in the correct group
-      window.location = "/cloud_error"
-    }
-    if(responseData["auth-error"]) {
-      window.location = "/disconnect"
-    }
+      if (responseData["error"]) {
+        console.log("ERROR: ", responseData)
+        // The cloud project may not be in the correct group
+        window.location = "/cloud_error"
+      }
+      if (responseData["auth-error"]) {
+        window.location = "/disconnect"
+      }
 
-    if(responseData.mediaItemsSet) {
-      // If there are media items set then the picking session is over
-      // forward to the list page to see those items
-      window.location = "/list"
-    } else {
-      new QRCode(document.getElementById("qrcode"), responseData.pickerUri);
+      if (responseData.mediaItemsSet) {
+        // If there are media items set then the picking session is over
+        // forward to the list page to see those items
+        window.location = "/list"
+      } else {
+        new QRCode(document.getElementById("qrcode"), responseData.pickerUri);
 
-      $("#picker_url").attr("href", responseData.pickerUri)
-      $('#picker_url').show()
-    }
-  })
+        $("#picker_url").attr("href", responseData.pickerUri)
+        $('#picker_url').show()
+      }
+    })
 }
 
 
@@ -37,11 +37,11 @@ const showQRCode = () => {
 const fetchImages = async (pageToken) => {
 
   let pageTokenQuery = ""
-  if(pageToken) {
-    pageTokenQuery = "?pageToken="+pageToken
+  if (pageToken) {
+    pageTokenQuery = "?pageToken=" + pageToken
   }
 
-  const response = await fetch("/fetch_images"+pageTokenQuery, {
+  const response = await fetch("/fetch_images" + pageTokenQuery, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -64,12 +64,12 @@ const loadImageIntoImg = (imgId, baseUrl) => {
     body: JSON.stringify({
       "baseUrl": baseUrl
     })
-   }).then(res => {
-     res.blob().then(blob => {
-       document.getElementById(imgId).src = URL.createObjectURL(blob)
-       $("#largeImg").show()
-     })
-   })
+  }).then(res => {
+    res.blob().then(blob => {
+      document.getElementById(imgId).src = URL.createObjectURL(blob)
+      $("#largeImg").show()
+    })
+  })
 }
 
 const loadImageIntoVideo = (videoId, baseUrl) => {
@@ -83,12 +83,17 @@ const loadImageIntoVideo = (videoId, baseUrl) => {
     body: JSON.stringify({
       "baseUrl": baseUrl
     })
-   }).then(res => {
-     res.blob().then(blob => {
-       document.getElementById(videoId).src = URL.createObjectURL(blob)
-       $("#largeVideo").show()
-       $("#downloadVideo").hide()
-     })
-   })
+  }).then(res => {
+    if (!res.ok) throw new Error('Failed to load video');
+    res.blob().then(blob => {
+      document.getElementById(videoId).src = URL.createObjectURL(blob)
+      $("#largeVideo").show()
+      $("#downloadVideo").hide()
+    })
+  }).catch(err => {
+    console.error(err);
+    $("#downloadVideo").text("Error loading video");
+    // Still allow upload even if preview fails
+  })
 }
 
