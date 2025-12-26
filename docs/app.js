@@ -262,6 +262,7 @@ async function displaySelectedPhotos() {
         const data = await response.json();
         const mediaItems = data.mediaItems || [];
 
+        console.log('Full API response:', JSON.stringify(data, null, 2));
         console.log('Media items received:', mediaItems);
 
         if (mediaItems.length === 0) {
@@ -274,8 +275,7 @@ async function displaySelectedPhotos() {
         grid.innerHTML = '';
 
         mediaItems.forEach(item => {
-            console.log('Processing item:', item);
-
+            console.log('Processing item:', JSON.stringify(item, null, 2));
             const photoCard = document.createElement('div');
             photoCard.className = 'photo-card';
 
