@@ -17,24 +17,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check for stored client ID
     clientId = localStorage.getItem('google_client_id');
 
-    // Check for stored session
-    const storedToken = sessionStorage.getItem('access_token');
-    if (storedToken && clientId) {
-        accessToken = storedToken;
-        initializeApp();
-    }
-
-    // If client ID exists, initialize Google Sign-In button
     if (clientId) {
+        // Pre-fill the input
+        document.getElementById('client-id-input').value = clientId;
+
+        // Show sign-in section, hide config form
+        document.getElementById('config-form').classList.add('hidden');
+        document.getElementById('signin-section').classList.remove('hidden');
+
+        // Check for stored session
+        const storedToken = sessionStorage.getItem('access_token');
+        if (storedToken) {
+            accessToken = storedToken;
+            initializeApp();
+        }
+
+        // Initialize Google Sign-In button
         waitForGoogleScript();
     }
 
     // Event listeners
     document.getElementById('sign-out-btn')?.addEventListener('click', signOut);
     document.getElementById('open-picker-btn')?.addEventListener('click', openPhotoPicker);
-    document.getElementById('config-btn-link')?.addEventListener('click', showConfigModal);
     document.getElementById('save-config-btn')?.addEventListener('click', saveConfig);
-    document.getElementById('close-modal-btn')?.addEventListener('click', closeConfigModal);
 });
 
 // Show configuration modal
@@ -53,24 +58,42 @@ function closeConfigModal() {
 // Save configuration
 function saveConfig() {
     const input = document.getElementById('client-id-input');
+    const message = document.getElementById('config-message');
     const newClientId = input.value.trim();
 
+    // Clear previous message
+    message.classList.add('hidden');
+    message.className = 'config-message hidden';
+
     if (!newClientId) {
-        alert('Please enter a valid Client ID');
+        showMessage('Please enter a valid Client ID', 'error');
         return;
     }
 
     if (!newClientId.endsWith('.apps.googleusercontent.com')) {
-        alert('Client ID should end with .apps.googleusercontent.com');
+        showMessage('Client ID should end with .apps.googleusercontent.com', 'error');
         return;
     }
 
     clientId = newClientId;
     localStorage.setItem('google_client_id', clientId);
-    closeConfigModal();
 
-    // Reload to initialize with new client ID
-    location.reload();
+    showMessage('✓ Configuration saved! Initializing...', 'success');
+
+    // Hide config form, show sign-in section
+    setTimeout(() => {
+        document.getElementById('config-form').classList.add('hidden');
+        document.getElementById('signin-section').classList.remove('hidden');
+        waitForGoogleScript();
+    }, 1000);
+}
+
+// Show inline message
+function showMessage(text, type) {
+    const message = document.getElementById('config-message');
+    message.textContent = text;
+    message.className = `config-message ${type}`;
+    message.classList.remove('hidden');
 }
 
 // Wait for Google Identity Services script to load
