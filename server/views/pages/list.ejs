@@ -118,7 +118,15 @@
 
 		mediaItems.forEach((mediaItem, idx) => {
 			const imgId = `mediaItem-${idx}`
-			$("#imageList").append(`<img class='thumbnail cursor-pointer rounded-md m-2' id='${imgId}' />`)
+			const isVideo = mediaItem.type === 'VIDEO';
+			const videoIcon = isVideo ? '<div class="absolute inset-0 flex items-center justify-center pointer-events-none"><span class="text-white text-4xl shadow-lg">▶️</span></div>' : '';
+
+			$("#imageList").append(`
+				<div class="relative inline-block m-2">
+					${videoIcon}
+					<img class='thumbnail cursor-pointer rounded-md' id='${imgId}' />
+				</div>
+			`)
 
 			// Select thumbnail size to display in list (here that is max 128px x 128px)
 			const sizeParams = "=w128-h128"
@@ -181,6 +189,57 @@
 	})
 
 
+
+	const uploadVideoToYouTube = async () => {
+		const mediaItem = $('#uploadToYouTube').data('mediaItem')
+
+		if (!mediaItem || mediaItem.type !== 'VIDEO') {
+			alert('Please select a video to upload')
+			return
+		}
+
+		// Prompt for video details
+		const title = prompt('Enter video title:', mediaItem.mediaFile.filename || 'Untitled Video')
+		if (!title) return
+
+		const description = prompt('Enter video description (optional):', '')
+		const privacy = prompt('Enter privacy status (public/unlisted/private):', 'unlisted')
+
+		// Disable button and show loading
+		const button = $('#uploadToYouTube')
+		button.prop('disabled', true)
+		button.text('Uploading...')
+
+		try {
+			const response = await fetch('/upload-to-youtube', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					baseUrl: mediaItem.mediaFile.baseUrl,
+					title: title,
+					description: description,
+					privacy: privacy
+				})
+			})
+
+			const result = await response.json()
+
+			if (response.ok && result.success) {
+				alert(`✓ Video uploaded successfully!\nVideo ID: ${result.videoId}\nTitle: ${result.title}`)
+				button.text('✓ Uploaded')
+				button.css('background', '#22c55e')
+			} else {
+				throw new Error(result.error || 'Upload failed')
+			}
+		} catch (error) {
+			console.error('Upload error:', error)
+			alert(`Upload failed: ${error.message}`)
+			button.prop('disabled', false)
+			button.text('📤 Upload to YouTube')
+		}
+	}
 
 	const closeModal = () => {
 		$('#modal').hide()
