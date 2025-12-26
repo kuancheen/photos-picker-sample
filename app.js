@@ -20,7 +20,7 @@ import fetch from 'node-fetch';
 import http from 'http';
 
 import passport from 'passport';
-import { Strategy } from 'passport-google-oauth2'
+// import { Strategy } from 'passport-google-oauth2'
 
 import persist from 'node-persist';
 import session from 'express-session';
@@ -29,14 +29,14 @@ import ejs from 'ejs';
 import stream from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 
-import {auth} from './auth.js';
-import {config} from './config.cjs';
+import { auth } from './auth.js';
+import { config } from './config.cjs';
 
-if(config.oAuthClientID == "ADD YOUR CLIENT ID" || config.oAuthclientSecret == "ADD YOUR CLIENT SECRET") {
+if (config.oAuthClientID == "ADD YOUR CLIENT ID" || config.oAuthclientSecret == "ADD YOUR CLIENT SECRET") {
   throw new Error('Add your oAuthClientID and oAuthclientSecret in config.cjs');
 }
 
-import {fileURLToPath} from 'url';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const fileStore = sessionFileStore(session);
@@ -94,7 +94,7 @@ app.use('/js',
 app.use(bodyParser.json());
 
 // Parse application/xwww-form-urlencoded request data.
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Enable user session handling.
 app.use(sessionMiddleware);
@@ -109,7 +109,7 @@ app.use((req, res, next) => {
   res.locals.name = '-';
   if (req.user && req.user.profile && req.user.profile.name) {
     res.locals.name =
-        req.user.profile.name.givenName || req.user.profile.displayName;
+      req.user.profile.name.givenName || req.user.profile.displayName;
   }
 
   res.locals.avatarUrl = '';
@@ -126,14 +126,14 @@ const createNewSession = async (req, res) => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + req.user.token      
+      'Authorization': 'Bearer ' + req.user.token
     },
     json: true
   }).then((response) => response.json())
-  .then((responseData) => {
-    sessionCache.setItem(req.user.profile.id, responseData)
-    res.render('pages/picker', {session: responseData});
-  })
+    .then((responseData) => {
+      sessionCache.setItem(req.user.profile.id, responseData)
+      res.render('pages/picker', { session: responseData });
+    })
 }
 
 
@@ -145,14 +145,14 @@ app.get('/', async (req, res) => {
     // Not logged in yet.
     res.render('pages/login');
   } else {
-    
+
     let session = await sessionCache.getItem(req.user.profile.id)
-    if(!session) {
+    if (!session) {
       createNewSession(req, res)
     } else {
-      res.render('pages/picker', {session: session});      
+      res.render('pages/picker', { session: session });
     }
-    
+
   }
 });
 
@@ -162,12 +162,12 @@ app.get('/list', async (req, res) => {
     // Not logged in yet.
     res.render('pages/login');
   } else {
-    
+
     let session = await sessionCache.getItem(req.user.profile.id)
-    if(!session) {
+    if (!session) {
       res.render('pages/login');
     } else {
-      res.render('pages/list', {session: session});      
+      res.render('pages/list', { session: session });
     }
 
   }
@@ -179,7 +179,7 @@ app.get('/new_session', async (req, res) => {
     // Not logged in yet.
     res.render('pages/login');
   } else {
-    
+
     let session = await sessionCache.getItem(req.user.profile.id)
     createNewSession(req, res)
 
@@ -195,20 +195,20 @@ app.get('/cloud_error', async (req, res) => {
 app.get("/get_session", async (req, res) => {
   if (!req.user || !req.isAuthenticated()) {
     // Not logged in yet.
-    res.send({"auth-error": "not authenticated"})
+    res.send({ "auth-error": "not authenticated" })
     return
   }
 
   const session = await sessionCache.getItem(req.user.profile.id)
-  if(!session.id) {
-    res.send({"auth-error": "not authenticated"})
+  if (!session.id) {
+    res.send({ "auth-error": "not authenticated" })
     return
   }
 
   const session_url = "https://photospicker.googleapis.com/v1/sessions/"
 
 
-  const response = fetch(session_url+session.id, {
+  const response = fetch(session_url + session.id, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -216,12 +216,12 @@ app.get("/get_session", async (req, res) => {
     },
     json: true
   }).then((response) => response.json())
-  .then((responseData) => {
+    .then((responseData) => {
 
-    sessionCache.setItem(req.user.profile.id, responseData)
-    res.send(responseData)
+      sessionCache.setItem(req.user.profile.id, responseData)
+      res.send(responseData)
 
-  })
+    })
 
 })
 
@@ -233,7 +233,7 @@ app.get("/fetch_images", async (req, res) => {
   const pageSize = 25 // user definable; default up to 100
 
   let itemsQuery = `sessionId=${session.id}&pageSize=${pageSize}`
-  if("pageToken" in req.query) {
+  if ("pageToken" in req.query) {
     itemsQuery += `&pageToken=${req.query['pageToken']}`
   }
 
@@ -245,18 +245,18 @@ app.get("/fetch_images", async (req, res) => {
     },
     json: true
   }).then((response) => response.json())
-  .then((responseData) => {
-    res.send({"images": responseData})
-  })
+    .then((responseData) => {
+      res.send({ "images": responseData })
+    })
 
 })
 
 
 
-app.post("/image", async (req, res) => { 
-  const baseUrl = req.body.baseUrl 
+app.post("/image", async (req, res) => {
+  const baseUrl = req.body.baseUrl
 
- fetch(baseUrl, {
+  fetch(baseUrl, {
     method: 'GET',
     headers: new Headers({
       'Authorization': `Bearer ${req.user.token}`,
@@ -266,7 +266,7 @@ app.post("/image", async (req, res) => {
     // if response is 403 here, then baseurl could be invalid,
     // or it's been > 7 days and the baseurl is expired.
 
-    response.arrayBuffer().then(buf =>{
+    response.arrayBuffer().then(buf => {
       const bytes = new Uint8Array(buf)
 
       const readStream = new stream.PassThrough();
@@ -281,10 +281,10 @@ app.post("/image", async (req, res) => {
 })
 
 
-app.post("/video", async (req, res) => { 
+app.post("/video", async (req, res) => {
   const baseUrl = req.body.baseUrl + "=dv"
 
- fetch(baseUrl, {
+  fetch(baseUrl, {
     method: 'GET',
     headers: new Headers({
       'Authorization': `Bearer ${req.user.token}`,
@@ -294,7 +294,7 @@ app.post("/video", async (req, res) => {
     // if response is 403 here, then baseurl could be invalid,
     // or it's been > 7 days and the baseurl is expired.
 
-    response.arrayBuffer().then(buf =>{
+    response.arrayBuffer().then(buf => {
       const bytes = new Uint8Array(buf)
 
       const readStream = new stream.PassThrough();
@@ -316,10 +316,10 @@ app.get('/disconnect', async (req, res) => {
   if (req.user && req.isAuthenticated()) {
     // remove current session if it exists
     await sessionCache.removeItem(req.user.profile.id)
-  } 
+  }
 
-  req.logout(function(err) {
-    if(err) {
+  req.logout(function (err) {
+    if (err) {
       console.log("ERROR on disconnect", err)
     } else {
       req.session.destroy();
@@ -329,35 +329,20 @@ app.get('/disconnect', async (req, res) => {
 });
 
 
-const strategy = new Strategy({
-    clientID:     config.oAuthClientID,
-    clientSecret: config.oAuthclientSecret,
-    callbackURL: config.oAuthCallbackUrl,
-    passReqToCallback   : true
-  },
-  function(request, accessToken, refreshToken, profile, done) {
-    // Callback takes: error, user_object
-    return done(null, {
-      profile: profile,
-      token: accessToken
-    })
-  }
-)
-
-passport.use("google", strategy);
+// Strategy setup moved to auth.js
 
 
 app.get('/auth/google',
-  passport.authenticate('google', { 
-    scope: config.scopes 
+  passport.authenticate('google', {
+    scope: config.scopes
   }
-));
+  ));
 
-app.get( '/auth/google/callback',
-  passport.authenticate( 'google', {
+app.get('/auth/google/callback',
+  passport.authenticate('google', {
     successRedirect: '/',
     failureRedirect: '/'
-}));
+  }));
 
 
 // Start the server
@@ -387,14 +372,14 @@ function returnError(res, data) {
 }
 
 // Return the body as JSON if the request was successful, or thrown a StatusError.
-async function checkStatus(response){
-  if (!response.ok){
+async function checkStatus(response) {
+  if (!response.ok) {
     // Throw a StatusError if a non-OK HTTP status was returned.
     let message = "";
-    try{
+    try {
       // Try to parse the response body as JSON, in case the server returned a useful response.
       message = await response.json();
-    } catch( err ){
+    } catch (err) {
       // Ignore if no JSON payload was retrieved and use the status text instead.
     }
     throw new StatusError(response.status, response.statusText, message);
@@ -410,7 +395,7 @@ class StatusError extends Error {
     super(...params)
     this.status = status;
     this.statusTitle = title;
-    this.serverMessage= serverMessage;
+    this.serverMessage = serverMessage;
   }
 }
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {config} from './config.cjs';
-import {Strategy as GoogleOAuthStrategy} from 'passport-google-oauth20';
+import { config } from './config.cjs';
+import { Strategy as GoogleOAuthStrategy } from 'passport-google-oauth20';
 import GoogleTokenStrategy from 'passport-google-id-token'
 
 
@@ -21,14 +21,14 @@ export const auth = (passport) => {
   passport.serializeUser((user, done) => done(null, user));
   passport.deserializeUser((user, done) => done(null, user));
   passport.use(new GoogleOAuthStrategy(
-      {
-        clientID: config.oAuthClientID,
-        clientSecret: config.oAuthclientSecret,
-        callbackURL: config.oAuthCallbackUrl
-      },
-      (token, refreshToken, profile, done) => {
-        console.log("TOKEN", token)
-        console.log("PROFILE", profile)
-        done(null, {profile, token})
-      }));
+    {
+      clientID: config.oAuthClientID,
+      clientSecret: config.oAuthclientSecret,
+      callbackURL: config.oAuthCallbackUrl
+    },
+    (token, refreshToken, profile, done) => {
+      // console.log("TOKEN", token)
+      // console.log("PROFILE", profile)
+      return done(null, { profile, token })
+    }));
 };
