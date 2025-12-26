@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2024-12-27
+
+### Fixed
+- **Server UI**: Fixed "Upload to YouTube" button not appearing in video detail modal
+- **Server UI**: Added error handling for video loading state; prevents "Fetching video..." from hanging
+- **UX**: Added `▶️` video indicator overlay to thumbnails in the grid view
+- **Copyright**: Updated copyright year to 2025
+
 ## [0.2.1 (Beta)] - 2024-12-27
 
 ### Experimental
