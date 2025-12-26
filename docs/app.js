@@ -422,7 +422,7 @@ async function uploadToYouTube(item, button) {
             filename: item.mediaFile?.filename
         });
 
-        const initResponse = await fetch(`${CONFIG.youtubeApiEndpoint}/videos?uploadType=resumable&part=snippet,status`, {
+        const initResponse = await fetch(`https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
