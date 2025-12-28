@@ -319,6 +319,18 @@ app.post("/upload-to-youtube", async (req, res) => {
       return res.status(400).send({ error: 'Missing required fields: baseUrl and title' });
     }
 
+    // DEBUG: Check token scopes
+    try {
+      const tokenInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${req.user.token}`);
+      const tokenInfo = await tokenInfoResponse.json();
+      console.log('DEBUG: Token Scopes:', tokenInfo.scope);
+      if (!tokenInfo.scope.includes('youtube.upload')) {
+        console.error('CRITICAL: Token indicates missing youtube.upload scope!');
+      }
+    } catch (e) {
+      console.error('DEBUG: Failed to check token scopes', e);
+    }
+
     // Step 1: Download video from Google Photos
     console.log('Downloading video from Google Photos...');
     const videoUrl = `${baseUrl}=dv`;

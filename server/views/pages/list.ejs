@@ -111,6 +111,17 @@
 		</p>
 	</footer>
 
+	<!-- On-Page Debug Console -->
+	<div id="debug-console"
+		class="fixed bottom-0 left-0 right-0 h-48 bg-gray-900 text-green-400 text-xs font-mono p-4 overflow-y-auto border-t-2 border-green-600 opacity-90 z-50 p-4"
+		style="display:none;">
+		<div class="flex justify-between mb-2 border-b border-gray-700 pb-1">
+			<span class="font-bold">🖥️ Debug Console</span>
+			<button onclick="$('#debug-console').hide()" class="text-red-400 hover:text-white">[Hide]</button>
+		</div>
+		<div id="debug-output"></div>
+	</div>
+
 </body>
 
 <script type="text/javascript">
@@ -161,8 +172,19 @@
 	loadList()
 
 
+	// Helper to log to on-page console
+	const logToPage = (msg, type = 'info') => {
+		$('#debug-console').show();
+		const timestamp = new Date().toLocaleTimeString();
+		const color = type === 'error' ? 'text-red-400' : 'text-green-400';
+		$('#debug-output').append(`<div class="${color}">[${timestamp}] ${msg}</div>`);
+		const consoleDiv = document.getElementById('debug-console');
+		consoleDiv.scrollTop = consoleDiv.scrollHeight;
+	}
+
 	$(document).on('click', '.thumbnail', e => {
 		console.log("Thumbnail clicked");
+		logToPage("Thumbnail clicked"); // Log to page
 		e.stopPropagation();
 		e.stopImmediatePropagation();
 
@@ -170,14 +192,17 @@
 			const imageClickedId = parseInt(e.target.id.replace(/.*\-/, ""))
 			const mediaItem = mediaItems[imageClickedId]
 			console.log("Media Item:", mediaItem);
+			logToPage(`Media Item Selected: ${mediaItem.filename} (${mediaItem.type})`);
 
 			let metadata = []
+			// ... (metadata processing remains same)
 
 			$("#metadataTable").html("")
-
 			const meta = mediaItem.mediaFile.mediaFileMetadata
+			// ... (metadata display logic remains same)
 
 			if (meta) {
+				// ... existing logic to populate metadata
 				Object.keys(meta).forEach(key => {
 					const value = meta[key]
 					if (typeof value === 'object') {
@@ -188,48 +213,50 @@
 						metadata.push([key, value])
 					}
 				})
-
 				let metadatatags = []
 				metadata.forEach(value => {
 					metadatatags.push(`<tr><td>${value[0]}</td><td>${value[1]}</td></tr>`)
 				})
-
 				$("#metadataTable").html(metadatatags.join())
-
 			}
+
 
 			$("#largeImg").hide()
 			$("#largeVideo").hide()
 			$("#videoInfo").hide()
 
 			if (mediaItem.type == "VIDEO") {
-				console.log("Item is VIDEO. Skipping preview load.");
+				logToPage("Item is VIDEO. Skipping preview load.");
 
 				// Show Video Info & Link
 				$("#videoInfo").show();
-				$("#viewOnGooglePhotos").attr("href", mediaItem.productUrl);
+
+				logToPage(`Checking Product URL...`);
+				if (mediaItem.productUrl) {
+					logToPage(`Found URL: ${mediaItem.productUrl}`);
+					$("#viewOnGooglePhotos").attr("href", mediaItem.productUrl);
+					$("#viewOnGooglePhotos").removeClass("text-gray-400 cursor-not-allowed").addClass("text-blue-600 hover:text-blue-800");
+				} else {
+					logToPage("MISSING productUrl!", 'error');
+					$("#viewOnGooglePhotos").attr("href", "#");
+					$("#viewOnGooglePhotos").removeClass("text-blue-600 hover:text-blue-800").addClass("text-gray-400 cursor-not-allowed");
+				}
 
 				// Show YouTube upload button immediately
-				console.log("Showing upload button...");
 				const btn = $("#uploadToYouTube");
 				btn.show();
 				btn.data('mediaItem', mediaItem);
 				btn.prop('disabled', false); // Ensure enabled
 				btn.text('📤 Upload to YouTube'); // Reset text
-
-				// Force display check
-				if (btn.css('display') === 'none') {
-					console.warn("Button is still hidden. Forcing display: block");
-					btn.css('display', 'block');
-				}
 			} else {
-				console.log("Item is PHOTO");
+				logToPage("Item is PHOTO");
 				loadImageIntoImg("largeImg", mediaItem.mediaFile.baseUrl)
 				$("#uploadToYouTube").hide()
 			}
 			$("#modal").show()
 		} catch (err) {
 			console.error("Error in thumbnail click handler:", err);
+			logToPage(`Click Error: ${err.message}`, 'error');
 			alert("Error opening item details: " + err.message);
 		}
 	})
