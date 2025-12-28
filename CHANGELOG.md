@@ -4,15 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     
-## [0.2.4] - 2024-12-28
-
+## [0.2.6 (Beta)] - 2025-12-28
+### Added
+- **UI Cleanup**: Removed granular on-page Debug Console and token scope logging following successful verification of the YouTube upload feature.
+- **Improved Stability**: Removed extra `console.log` statements and server-side debug piping to prepare for production-ready state.
 ### Changed
-- **Server UI**: Skipped heavy video preview loading; replaced with a direct link to "View original video on Google Photos"
-- **UX**: Upload button now appears immediately for faster interaction
+- **Privacy Notice**: Added documentation regarding YouTube's "Locked Private" state for videos uploaded via unverified API applications.
 
+## [0.2.5 (Beta)] - 2025-12-28
 ### Fixed
-- **Error Handling**: Added specific check for "Insufficient Permission" (403) errors during upload, prompting users to re-authenticate
-- **Cache Busting**: Updated asset versions to v0.2.4
+- **YouTube Upload Permission**: Added `prompt: 'consent'` to OAuth flow to force Google to ask for missing permissions (specifically `youtube.upload`).
+- **Google Photos Link**: Fixed "View original" link by falling back to `baseUrl` when `productUrl` is missing from the Picker API response.
+- **Client-Side Logging**: Added an on-page "Debug Console" overlay to display critical errors and server-side token scopes.
+- **Server-Side Debugging**: Added logic to return OAuth token scopes in the API response.
+
+## [0.2.4] - 2025-12-28
 
 ## [0.2.3] - 2024-12-28
 

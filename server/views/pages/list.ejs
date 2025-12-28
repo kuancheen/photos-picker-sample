@@ -7,12 +7,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>Photo Picker</title>
 
-	<link href="/styles.css?v=0.2.5" rel="stylesheet">
+	<link href="/styles.css?v=0.2.6" rel="stylesheet">
 
 	<script src="/js/jquery.slim.min.js"></script>
 	<script src="/qrcode.js"></script>
 
-	<script src="/js/picker.js?v=0.2.5"></script>
+	<script src="/js/picker.js?v=0.2.6"></script>
 
 </head>
 
@@ -99,7 +99,7 @@
 
 	<footer class="mt-12 mb-8 text-center text-sm text-gray-500">
 		<p>
-			v0.2.5 (Beta) |
+			v0.2.6 (Beta) |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/README.md"
 				target="_blank" class="hover:underline">README</a> |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/CHANGELOG.md"
@@ -111,16 +111,7 @@
 		</p>
 	</footer>
 
-	<!-- On-Page Debug Console -->
-	<div id="debug-console"
-		class="fixed bottom-0 left-0 right-0 h-48 bg-gray-900 text-green-400 text-xs font-mono p-4 overflow-y-auto border-t-2 border-green-600 opacity-90 z-50 p-4"
-		style="display:none;">
-		<div class="flex justify-between mb-2 border-b border-gray-700 pb-1">
-			<span class="font-bold">🖥️ Debug Console</span>
-			<button onclick="$('#debug-console').hide()" class="text-red-400 hover:text-white">[Hide]</button>
-		</div>
-		<div id="debug-output"></div>
-	</div>
+
 
 </body>
 
@@ -174,96 +165,75 @@
 
 	// Helper to log to on-page console
 	const logToPage = (msg, type = 'info') => {
-		$('#debug-console').show();
-		const timestamp = new Date().toLocaleTimeString();
-		const color = type === 'error' ? 'text-red-400' : 'text-green-400';
-		$('#debug-output').append(`<div class="${color}">[${timestamp}] ${msg}</div>`);
-		const consoleDiv = document.getElementById('debug-console');
-		consoleDiv.scrollTop = consoleDiv.scrollHeight;
+		console.log(`[${type}] ${msg}`);
 	}
 
-	$(document).on('click', '.thumbnail', e => {
-		console.log("Thumbnail clicked");
-		logToPage("Thumbnail clicked"); // Log to page
-		e.stopPropagation();
-		e.stopImmediatePropagation();
+	try {
+		const imageClickedId = parseInt(e.target.id.replace(/.*\-/, ""))
+		const mediaItem = mediaItems[imageClickedId]
+		console.log("Media Item:", mediaItem);
 
-		try {
-			const imageClickedId = parseInt(e.target.id.replace(/.*\-/, ""))
-			const mediaItem = mediaItems[imageClickedId]
-			console.log("Media Item:", mediaItem);
-			logToPage(`Media Item Selected: ${mediaItem.filename} (${mediaItem.type})`);
+		let metadata = []
+		// ... (metadata processing remains same)
 
-			let metadata = []
-			// ... (metadata processing remains same)
+		$("#metadataTable").html("")
+		const meta = mediaItem.mediaFile.mediaFileMetadata
+		// ... (metadata display logic remains same)
 
-			$("#metadataTable").html("")
-			const meta = mediaItem.mediaFile.mediaFileMetadata
-			// ... (metadata display logic remains same)
-
-			if (meta) {
-				// ... existing logic to populate metadata
-				Object.keys(meta).forEach(key => {
-					const value = meta[key]
-					if (typeof value === 'object') {
-						Object.keys(value).forEach(value_key => {
-							metadata.push([value_key, value[value_key]])
-						})
-					} else {
-						metadata.push([key, value])
-					}
-				})
-				let metadatatags = []
-				metadata.forEach(value => {
-					metadatatags.push(`<tr><td>${value[0]}</td><td>${value[1]}</td></tr>`)
-				})
-				$("#metadataTable").html(metadatatags.join())
-			}
-
-
-			$("#largeImg").hide()
-			$("#largeVideo").hide()
-			$("#videoInfo").hide()
-
-			if (mediaItem.type == "VIDEO") {
-				logToPage("Item is VIDEO. Skipping preview load.");
-
-				// Show Video Info & Link
-				$("#videoInfo").show();
-				
-				const fullLog = JSON.stringify(mediaItem, null, 2);
-				logToPage(`Item Details: ${fullLog}`);
-
-				if (mediaItem.productUrl) {
-					logToPage(`Found Product URL: ${mediaItem.productUrl}`);
-					$("#viewOnGooglePhotos").attr("href", mediaItem.productUrl);
-				} else if (mediaItem.mediaFile && mediaItem.mediaFile.baseUrl) {
-					logToPage(`Using BaseUrl as fallback (Picker API excludes productUrl)`);
-					$("#viewOnGooglePhotos").attr("href", mediaItem.mediaFile.baseUrl); // Fallback
+		if (meta) {
+			// ... existing logic to populate metadata
+			Object.keys(meta).forEach(key => {
+				const value = meta[key]
+				if (typeof value === 'object') {
+					Object.keys(value).forEach(value_key => {
+						metadata.push([value_key, value[value_key]])
+					})
 				} else {
-					logToPage("MISSING URL completely!", 'error');
-					$("#viewOnGooglePhotos").attr("href", "#");
+					metadata.push([key, value])
 				}
-				
-				$("#viewOnGooglePhotos").removeClass("text-gray-400 cursor-not-allowed").addClass("text-blue-600 hover:text-blue-800");
-
-				// Show YouTube upload button immediately
-				const btn = $("#uploadToYouTube");
-				btn.show();
-				btn.data('mediaItem', mediaItem);
-				btn.prop('disabled', false); // Ensure enabled
-				btn.text('📤 Upload to YouTube'); // Reset text
-			} else {
-				logToPage("Item is PHOTO");
-				loadImageIntoImg("largeImg", mediaItem.mediaFile.baseUrl)
-				$("#uploadToYouTube").hide()
-			}
-			$("#modal").show()
-		} catch (err) {
-			console.error("Error in thumbnail click handler:", err);
-			logToPage(`Click Error: ${err.message}`, 'error');
-			alert("Error opening item details: " + err.message);
+			})
+			let metadatatags = []
+			metadata.forEach(value => {
+				metadatatags.push(`<tr><td>${value[0]}</td><td>${value[1]}</td></tr>`)
+			})
+			$("#metadataTable").html(metadatatags.join())
 		}
+
+
+		$("#largeImg").hide()
+		$("#largeVideo").hide()
+		$("#videoInfo").hide()
+
+		if (mediaItem.type == "VIDEO") {
+			// Show Video Info & Link
+			$("#videoInfo").show();
+
+			if (mediaItem.productUrl) {
+				$("#viewOnGooglePhotos").attr("href", mediaItem.productUrl);
+			} else if (mediaItem.mediaFile && mediaItem.mediaFile.baseUrl) {
+				$("#viewOnGooglePhotos").attr("href", mediaItem.mediaFile.baseUrl); // Fallback
+			} else {
+				$("#viewOnGooglePhotos").attr("href", "#");
+			}
+
+			$("#viewOnGooglePhotos").removeClass("text-gray-400 cursor-not-allowed").addClass("text-blue-600 hover:text-blue-800");
+
+			// Show YouTube upload button immediately
+			const btn = $("#uploadToYouTube");
+			btn.show();
+			btn.data('mediaItem', mediaItem);
+			btn.prop('disabled', false); // Ensure enabled
+			btn.text('📤 Upload to YouTube'); // Reset text
+		} else {
+			loadImageIntoImg("largeImg", mediaItem.mediaFile.baseUrl)
+			$("#uploadToYouTube").hide()
+		}
+		$("#modal").show()
+	} catch (err) {
+		console.error("Error in thumbnail click handler:", err);
+		logToPage(`Click Error: ${err.message}`, 'error');
+		alert("Error opening item details: " + err.message);
+	}
 	})
 
 
@@ -304,10 +274,7 @@
 
 			const result = await response.json()
 
-			// Log server-side scopes if available
-			if (result.debug_scopes) {
-				logToPage(`SERVER SCOPES: ${result.debug_scopes}`, result.debug_scopes.includes('youtube.upload') ? 'info' : 'error');
-			}
+
 
 			if (response.ok && result.success) {
 				alert(`✓ Video uploaded successfully!\nVideo ID: ${result.videoId}\nTitle: ${result.title}`)
@@ -319,20 +286,13 @@
 		} catch (error) {
 			console.error('Upload error:', error)
 
-			// Log server-side scopes if attached to error object manually (not standard JS Error)
-			// Note: fetch throws on network error, but we caught 500 above and threw new Error(result.error)
-			// We need to parse the response body in the catch block if we want scopes from 500s.
-			// Actually, the logic above: "const result = await response.json()" runs even for 500s because response.ok is false but body exists.
-			// So "result" variable is not available here in catch block due to block scope? 
-			// No, let's fix the logic flow to ensure we capture result before throwing.
-			
+
 			let errorMessage = `Upload failed: ${error.message}`;
 
 			if (error.message.includes('Insufficient Permission') || error.message.includes('403')) {
 				errorMessage = "⚠️ Permission Error\n\nYou need to grant permission to upload to YouTube.\nPlease DISCONNECT and SIGN IN again to approve the new permissions.";
 			}
 
-			logToPage(`Upload Error: ${errorMessage}`, 'error');
 			alert(errorMessage)
 			button.prop('disabled', false)
 			button.text('📤 Upload to YouTube')

@@ -311,23 +311,11 @@ app.post("/video", async (req, res) => {
 
 
 app.post("/upload-to-youtube", async (req, res) => {
-  let debugScopes = "unchecked";
   try {
     const { baseUrl, title, description, privacy } = req.body;
 
     if (!baseUrl || !title) {
       return res.status(400).send({ error: 'Missing required fields: baseUrl and title' });
-    }
-
-    // DEBUG: Check token scopes
-    try {
-      const tokenInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${req.user.token}`);
-      const tokenInfo = await tokenInfoResponse.json();
-      debugScopes = tokenInfo.scope || "failed_to_parse";
-      console.log('DEBUG: Token Scopes:', debugScopes);
-    } catch (e) {
-      console.error('DEBUG: Failed to check token scopes', e);
-      debugScopes = "error_fetching_scopes: " + e.message;
     }
 
     // Step 1: Download video from Google Photos
@@ -382,15 +370,13 @@ app.post("/upload-to-youtube", async (req, res) => {
     res.send({
       success: true,
       videoId: uploadResponse.data.id,
-      title: title,
-      debug_scopes: debugScopes
+      title: title
     });
 
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).send({
-      error: error.message || 'Failed to upload video to YouTube',
-      debug_scopes: debugScopes
+      error: error.message || 'Failed to upload video to YouTube'
     });
   }
 });
@@ -423,10 +409,7 @@ app.get('/disconnect', async (req, res) => {
 // Strategy setup moved to auth.js
 
 
-app.get('/auth/google', (req, res, next) => {
-  console.log('DEBUG: Requesting Scopes:', config.scopes);
-  next();
-},
+app.get('/auth/google',
   passport.authenticate('google', {
     scope: config.scopes,
     prompt: 'consent', // FORCE correct consent screen for new scopes

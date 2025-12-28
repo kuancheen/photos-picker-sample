@@ -1,9 +1,14 @@
 # Google Photos Picker Sample App
-![Version](https://img.shields.io/badge/version-v0.2.5%20(Beta)-blue)
+![Version](https://img.shields.io/badge/version-v0.2.6%20(Beta)-blue)
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-yellow.svg)
 ![Semantic Versioning](https://img.shields.io/badge/semver-2.0.0-blue)
 ![Views](https://hits.sh/kuancheen.github.io/photos-picker-sample.svg?view=today-total&style=flat&label=👁️%20Views&extraCount=0&color=6366f1)
 ![Status](https://img.shields.io/badge/status-active-success)
+
+> [!IMPORTANT]
+> **YouTube Upload & Privacy Status**
+> 
+> By default, videos uploaded via an unverified Google Cloud project (like this sample app) are automatically set to **Private** and **Locked** by YouTube until the application is verified by Google. If your videos are "removed" or not appearing publicly, check your **YouTube Studio -> Content** tab for specific status messages. Duplicate video uploads may also be flagged as spam by YouTube's automated systems.
 
 > **Note**: This repository provides two implementations of the Google Photos Picker API.
 
