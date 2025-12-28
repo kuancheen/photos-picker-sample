@@ -425,7 +425,9 @@ app.get('/disconnect', async (req, res) => {
 
 app.get('/auth/google',
   passport.authenticate('google', {
-    scope: config.scopes
+    scope: config.scopes,
+    prompt: 'consent', // FORCE correct consent screen for new scopes
+    accessType: 'offline' // Ensure we get a refresh token (good practice)
   }
   ));
 
