@@ -7,12 +7,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>Photo Picker</title>
 
-	<link href="/styles.css?v=0.2.3" rel="stylesheet">
+	<link href="/styles.css?v=0.2.4" rel="stylesheet">
 
 	<script src="/js/jquery.slim.min.js"></script>
 	<script src="/qrcode.js"></script>
 
-	<script src="/js/picker.js?v=0.2.3"></script>
+	<script src="/js/picker.js?v=0.2.4"></script>
 
 </head>
 
@@ -32,7 +32,15 @@
 			<div class="flex flex-col items-center p-4 text-center sm:items-center sm:p-0">
 
 				<img id="largeImg" style="display: none;" />
-				<video id="largeVideo" controls style="display: none;"></video>
+
+				<!-- Video Placeholder / Link -->
+				<div id="videoInfo" style="display: none;" class="mb-4">
+					<p class="text-4xl mb-4">🎥</p>
+					<a id="viewOnGooglePhotos" href="#" target="_blank"
+						class="text-blue-600 underline hover:text-blue-800 font-medium">
+						View original video on Google Photos ↗
+					</a>
+				</div>
 
 				<!-- YouTube Upload Button -->
 				<button id="uploadToYouTube" onclick="uploadVideoToYouTube()" style="display: none;"
@@ -91,7 +99,7 @@
 
 	<footer class="mt-12 mb-8 text-center text-sm text-gray-500">
 		<p>
-			v0.2.3 (Beta) |
+			v0.2.4 (Beta) |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/README.md"
 				target="_blank" class="hover:underline">README</a> |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/CHANGELOG.md"
@@ -192,16 +200,22 @@
 
 			$("#largeImg").hide()
 			$("#largeVideo").hide()
+			$("#videoInfo").hide()
 
 			if (mediaItem.type == "VIDEO") {
-				console.log("Item is VIDEO. Initializing video player...");
-				loadImageIntoVideo("largeVideo", mediaItem.mediaFile.baseUrl)
+				console.log("Item is VIDEO. Skipping preview load.");
 
-				// Show YouTube upload button for videos
+				// Show Video Info & Link
+				$("#videoInfo").show();
+				$("#viewOnGooglePhotos").attr("href", mediaItem.productUrl);
+
+				// Show YouTube upload button immediately
 				console.log("Showing upload button...");
 				const btn = $("#uploadToYouTube");
 				btn.show();
 				btn.data('mediaItem', mediaItem);
+				btn.prop('disabled', false); // Ensure enabled
+				btn.text('📤 Upload to YouTube'); // Reset text
 
 				// Force display check
 				if (btn.css('display') === 'none') {
@@ -267,7 +281,15 @@
 			}
 		} catch (error) {
 			console.error('Upload error:', error)
-			alert(`Upload failed: ${error.message}`)
+
+			let errorMessage = `Upload failed: ${error.message}`;
+
+			if (error.message.includes('Insufficient Permission') || error.message.includes('403')) {
+				errorMessage = "⚠️ Permission Error\n\nYou need to grant permission to upload to YouTube.\nPlease DISCONNECT and SIGN IN again to approve the new permissions.";
+				// Optional: redirect to disconnect logic?
+			}
+
+			alert(errorMessage)
 			button.prop('disabled', false)
 			button.text('📤 Upload to YouTube')
 		}
