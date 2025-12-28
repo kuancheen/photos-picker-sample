@@ -423,7 +423,10 @@ app.get('/disconnect', async (req, res) => {
 // Strategy setup moved to auth.js
 
 
-app.get('/auth/google',
+app.get('/auth/google', (req, res, next) => {
+  console.log('DEBUG: Requesting Scopes:', config.scopes);
+  next();
+},
   passport.authenticate('google', {
     scope: config.scopes,
     prompt: 'consent', // FORCE correct consent screen for new scopes
