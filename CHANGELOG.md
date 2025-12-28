@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+    
+## [0.2.3] - 2024-12-28
+
+### Fixed
+- **Server UI**: Fixed invalid self-closing `<video />` tag which was hiding the upload button as fallback content
+- **Debugging**: Added detailed console logs and error handling to video selection logic to troubleshoot UI issues
+- **Cache Busting**: Updated asset versions to v0.2.3 to ensure new logic is loaded
 
 ## [0.2.2] - 2024-12-27
 

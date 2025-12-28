@@ -7,12 +7,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>Photo Picker</title>
 
-	<link href="/styles.css?v=0.2.2" rel="stylesheet">
+	<link href="/styles.css?v=0.2.3" rel="stylesheet">
 
 	<script src="/js/jquery.slim.min.js"></script>
 	<script src="/qrcode.js"></script>
 
-	<script src="/js/picker.js?v=0.2.2"></script>
+	<script src="/js/picker.js?v=0.2.3"></script>
 
 </head>
 
@@ -32,7 +32,7 @@
 			<div class="flex flex-col items-center p-4 text-center sm:items-center sm:p-0">
 
 				<img id="largeImg" style="display: none;" />
-				<video id="largeVideo" controls style="display: none;" />
+				<video id="largeVideo" controls style="display: none;"></video>
 
 				<!-- YouTube Upload Button -->
 				<button id="uploadToYouTube" onclick="uploadVideoToYouTube()" style="display: none;"
@@ -91,7 +91,7 @@
 
 	<footer class="mt-12 mb-8 text-center text-sm text-gray-500">
 		<p>
-			v0.2.2 (Beta) |
+			v0.2.3 (Beta) |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/README.md"
 				target="_blank" class="hover:underline">README</a> |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/CHANGELOG.md"
@@ -154,52 +154,70 @@
 
 
 	$(document).on('click', '.thumbnail', e => {
+		console.log("Thumbnail clicked");
 		e.stopPropagation();
 		e.stopImmediatePropagation();
 
-		const imageClickedId = parseInt(e.target.id.replace(/.*\-/, ""))
+		try {
+			const imageClickedId = parseInt(e.target.id.replace(/.*\-/, ""))
+			const mediaItem = mediaItems[imageClickedId]
+			console.log("Media Item:", mediaItem);
 
-		const mediaItem = mediaItems[imageClickedId]
+			let metadata = []
 
-		let metadata = []
+			$("#metadataTable").html("")
 
-		$("#metadataTable").html("")
+			const meta = mediaItem.mediaFile.mediaFileMetadata
 
-		const meta = mediaItem.mediaFile.mediaFileMetadata
+			if (meta) {
+				Object.keys(meta).forEach(key => {
+					const value = meta[key]
+					if (typeof value === 'object') {
+						Object.keys(value).forEach(value_key => {
+							metadata.push([value_key, value[value_key]])
+						})
+					} else {
+						metadata.push([key, value])
+					}
+				})
 
-		if (meta) {
-			Object.keys(meta).forEach(key => {
-				const value = meta[key]
-				if (typeof value === 'object') {
-					Object.keys(value).forEach(value_key => {
-						metadata.push([value_key, value[value_key]])
-					})
-				} else {
-					metadata.push([key, value])
+				let metadatatags = []
+				metadata.forEach(value => {
+					metadatatags.push(`<tr><td>${value[0]}</td><td>${value[1]}</td></tr>`)
+				})
+
+				$("#metadataTable").html(metadatatags.join())
+
+			}
+
+			$("#largeImg").hide()
+			$("#largeVideo").hide()
+
+			if (mediaItem.type == "VIDEO") {
+				console.log("Item is VIDEO. Initializing video player...");
+				loadImageIntoVideo("largeVideo", mediaItem.mediaFile.baseUrl)
+
+				// Show YouTube upload button for videos
+				console.log("Showing upload button...");
+				const btn = $("#uploadToYouTube");
+				btn.show();
+				btn.data('mediaItem', mediaItem);
+
+				// Force display check
+				if (btn.css('display') === 'none') {
+					console.warn("Button is still hidden. Forcing display: block");
+					btn.css('display', 'block');
 				}
-			})
-
-			let metadatatags = []
-			metadata.forEach(value => {
-				metadatatags.push(`<tr><td>${value[0]}</td><td>${value[1]}</td></tr>`)
-			})
-
-			$("#metadataTable").html(metadatatags.join())
-
+			} else {
+				console.log("Item is PHOTO");
+				loadImageIntoImg("largeImg", mediaItem.mediaFile.baseUrl)
+				$("#uploadToYouTube").hide()
+			}
+			$("#modal").show()
+		} catch (err) {
+			console.error("Error in thumbnail click handler:", err);
+			alert("Error opening item details: " + err.message);
 		}
-
-		$("#largeImg").hide()
-		$("#largeVideo").hide()
-		if (mediaItem.type == "VIDEO") {
-			loadImageIntoVideo("largeVideo", mediaItem.mediaFile.baseUrl)
-			// Show YouTube upload button for videos
-			$("#uploadToYouTube").show()
-			$("#uploadToYouTube").data('mediaItem', mediaItem)
-		} else {
-			loadImageIntoImg("largeImg", mediaItem.mediaFile.baseUrl)
-			$("#uploadToYouTube").hide()
-		}
-		$("#modal").show()
 	})
 
 
