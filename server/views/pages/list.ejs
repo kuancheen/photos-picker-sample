@@ -304,6 +304,11 @@
 
 			const result = await response.json()
 
+			// Log server-side scopes if available
+			if (result.debug_scopes) {
+				logToPage(`SERVER SCOPES: ${result.debug_scopes}`, result.debug_scopes.includes('youtube.upload') ? 'info' : 'error');
+			}
+
 			if (response.ok && result.success) {
 				alert(`✓ Video uploaded successfully!\nVideo ID: ${result.videoId}\nTitle: ${result.title}`)
 				button.text('✓ Uploaded')
@@ -314,13 +319,20 @@
 		} catch (error) {
 			console.error('Upload error:', error)
 
+			// Log server-side scopes if attached to error object manually (not standard JS Error)
+			// Note: fetch throws on network error, but we caught 500 above and threw new Error(result.error)
+			// We need to parse the response body in the catch block if we want scopes from 500s.
+			// Actually, the logic above: "const result = await response.json()" runs even for 500s because response.ok is false but body exists.
+			// So "result" variable is not available here in catch block due to block scope? 
+			// No, let's fix the logic flow to ensure we capture result before throwing.
+			
 			let errorMessage = `Upload failed: ${error.message}`;
 
 			if (error.message.includes('Insufficient Permission') || error.message.includes('403')) {
 				errorMessage = "⚠️ Permission Error\n\nYou need to grant permission to upload to YouTube.\nPlease DISCONNECT and SIGN IN again to approve the new permissions.";
-				// Optional: redirect to disconnect logic?
 			}
 
+			logToPage(`Upload Error: ${errorMessage}`, 'error');
 			alert(errorMessage)
 			button.prop('disabled', false)
 			button.text('📤 Upload to YouTube')

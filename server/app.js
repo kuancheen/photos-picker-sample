@@ -310,8 +310,8 @@ app.post("/video", async (req, res) => {
 })
 
 
-// POST request to upload video to YouTube
 app.post("/upload-to-youtube", async (req, res) => {
+  let debugScopes = "unchecked";
   try {
     const { baseUrl, title, description, privacy } = req.body;
 
@@ -323,12 +323,11 @@ app.post("/upload-to-youtube", async (req, res) => {
     try {
       const tokenInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${req.user.token}`);
       const tokenInfo = await tokenInfoResponse.json();
-      console.log('DEBUG: Token Scopes:', tokenInfo.scope);
-      if (!tokenInfo.scope.includes('youtube.upload')) {
-        console.error('CRITICAL: Token indicates missing youtube.upload scope!');
-      }
+      debugScopes = tokenInfo.scope || "failed_to_parse";
+      console.log('DEBUG: Token Scopes:', debugScopes);
     } catch (e) {
       console.error('DEBUG: Failed to check token scopes', e);
+      debugScopes = "error_fetching_scopes: " + e.message;
     }
 
     // Step 1: Download video from Google Photos
@@ -383,13 +382,15 @@ app.post("/upload-to-youtube", async (req, res) => {
     res.send({
       success: true,
       videoId: uploadResponse.data.id,
-      title: title
+      title: title,
+      debug_scopes: debugScopes
     });
 
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).send({
-      error: error.message || 'Failed to upload video to YouTube'
+      error: error.message || 'Failed to upload video to YouTube',
+      debug_scopes: debugScopes
     });
   }
 });
