@@ -251,7 +251,14 @@
 		if (!title) return
 
 		const description = prompt('Enter video description (optional):', '')
-		const privacy = prompt('Enter privacy status (public/unlisted/private):', 'unlisted')
+		
+		// POLICY: Unverified apps are locked to PRIVATE by YouTube.
+		// Asking for Public/Unlisted often leads to immediate deletion or "Locked Private" anyway.
+		const privacy = prompt('Enter privacy status (private recommended for unverified apps):', 'private')
+
+		// FINAL WARNING: YouTube policy checks
+		const confirmMessage = `⚠️ YOUTUBE POLICY NOTICE\n\n1. UNVERIFIED APP: Your video will likely be LOCKED to "Private" by YouTube automatically.\n2. NO DUPLICATES: If you upload the same file multiple times, YouTube will DELETE it as spam.\n\nProceed with upload?`;
+		if (!confirm(confirmMessage)) return
 
 		// Disable button and show loading
 		const button = $('#uploadToYouTube')

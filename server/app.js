@@ -358,7 +358,7 @@ app.post("/upload-to-youtube", async (req, res) => {
           categoryId: '22' // People & Blogs
         },
         status: {
-          privacyStatus: privacy || 'unlisted'
+          privacyStatus: privacy || 'private'
         }
       },
       media: {

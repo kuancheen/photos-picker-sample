@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     
+## [0.2.7 (Beta)] - 2025-12-30
+### Fixed
+- **YouTube Policy Compliance**: Defaulted upload privacy to `private` and added a mandatory UI warning regarding YouTube's "Locked Private" and "Duplicate Cleanup" policies.
+- **Improved UI UX**: Added confirm dialog before YouTube upload to prevent accidental multi-clicks.
+
 ## [0.2.6 (Beta)] - 2025-12-28
 ### Added
 - **UI Cleanup**: Removed granular on-page Debug Console and token scope logging following successful verification of the YouTube upload feature.
