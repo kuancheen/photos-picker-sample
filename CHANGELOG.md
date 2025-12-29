@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     
+## [0.2.8 (Beta)] - 2025-12-30
+### Changed
+- **UI Refinement**: Removed the mandatory policy confirmation dialog following user's successful verification of the upload flow (videos were being correctly processed as "Shorts").
+- **Asset Versioning**: Bumped all cache-busting parameters to v0.2.8.
+
 ## [0.2.7 (Beta)] - 2025-12-30
 ### Fixed
 - **YouTube Policy Compliance**: Defaulted upload privacy to `private` and added a mandatory UI warning regarding YouTube's "Locked Private" and "Duplicate Cleanup" policies.

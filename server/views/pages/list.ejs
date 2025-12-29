@@ -7,12 +7,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>Photo Picker</title>
 
-	<link href="/styles.css?v=0.2.6" rel="stylesheet">
+	<link href="/styles.css?v=0.2.8" rel="stylesheet">
 
 	<script src="/js/jquery.slim.min.js"></script>
 	<script src="/qrcode.js"></script>
 
-	<script src="/js/picker.js?v=0.2.6"></script>
+	<script src="/js/picker.js?v=0.2.8"></script>
 
 </head>
 
@@ -99,7 +99,7 @@
 
 	<footer class="mt-12 mb-8 text-center text-sm text-gray-500">
 		<p>
-			v0.2.6 (Beta) |
+			v0.2.8 (Beta) |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/README.md"
 				target="_blank" class="hover:underline">README</a> |
 			<a href="https://kuancheen.github.io/md-viewer/?https://github.com/kuancheen/photos-picker-sample/blob/main/CHANGELOG.md"
@@ -168,72 +168,73 @@
 		console.log(`[${type}] ${msg}`);
 	}
 
-	try {
-		const imageClickedId = parseInt(e.target.id.replace(/.*\-/, ""))
-		const mediaItem = mediaItems[imageClickedId]
-		console.log("Media Item:", mediaItem);
+	$(document).on('click', '.thumbnail', e => {
+		try {
+			const imageClickedId = parseInt(e.target.id.replace(/.*\-/, ""))
+			const mediaItem = mediaItems[imageClickedId]
+			console.log("Media Item:", mediaItem);
 
-		let metadata = []
-		// ... (metadata processing remains same)
+			let metadata = []
+			// ... (metadata processing remains same)
 
-		$("#metadataTable").html("")
-		const meta = mediaItem.mediaFile.mediaFileMetadata
-		// ... (metadata display logic remains same)
+			$("#metadataTable").html("")
+			const meta = mediaItem.mediaFile.mediaFileMetadata
+			// ... (metadata display logic remains same)
 
-		if (meta) {
-			// ... existing logic to populate metadata
-			Object.keys(meta).forEach(key => {
-				const value = meta[key]
-				if (typeof value === 'object') {
-					Object.keys(value).forEach(value_key => {
-						metadata.push([value_key, value[value_key]])
-					})
-				} else {
-					metadata.push([key, value])
-				}
-			})
-			let metadatatags = []
-			metadata.forEach(value => {
-				metadatatags.push(`<tr><td>${value[0]}</td><td>${value[1]}</td></tr>`)
-			})
-			$("#metadataTable").html(metadatatags.join())
-		}
-
-
-		$("#largeImg").hide()
-		$("#largeVideo").hide()
-		$("#videoInfo").hide()
-
-		if (mediaItem.type == "VIDEO") {
-			// Show Video Info & Link
-			$("#videoInfo").show();
-
-			if (mediaItem.productUrl) {
-				$("#viewOnGooglePhotos").attr("href", mediaItem.productUrl);
-			} else if (mediaItem.mediaFile && mediaItem.mediaFile.baseUrl) {
-				$("#viewOnGooglePhotos").attr("href", mediaItem.mediaFile.baseUrl); // Fallback
-			} else {
-				$("#viewOnGooglePhotos").attr("href", "#");
+			if (meta) {
+				// ... existing logic to populate metadata
+				Object.keys(meta).forEach(key => {
+					const value = meta[key]
+					if (typeof value === 'object') {
+						Object.keys(value).forEach(value_key => {
+							metadata.push([value_key, value[value_key]])
+						})
+					} else {
+						metadata.push([key, value])
+					}
+				})
+				let metadatatags = []
+				metadata.forEach(value => {
+					metadatatags.push(`<tr><td>${value[0]}</td><td>${value[1]}</td></tr>`)
+				})
+				$("#metadataTable").html(metadatatags.join())
 			}
 
-			$("#viewOnGooglePhotos").removeClass("text-gray-400 cursor-not-allowed").addClass("text-blue-600 hover:text-blue-800");
 
-			// Show YouTube upload button immediately
-			const btn = $("#uploadToYouTube");
-			btn.show();
-			btn.data('mediaItem', mediaItem);
-			btn.prop('disabled', false); // Ensure enabled
-			btn.text('📤 Upload to YouTube'); // Reset text
-		} else {
-			loadImageIntoImg("largeImg", mediaItem.mediaFile.baseUrl)
-			$("#uploadToYouTube").hide()
+			$("#largeImg").hide()
+			$("#largeVideo").hide()
+			$("#videoInfo").hide()
+
+			if (mediaItem.type == "VIDEO") {
+				// Show Video Info & Link
+				$("#videoInfo").show();
+
+				if (mediaItem.productUrl) {
+					$("#viewOnGooglePhotos").attr("href", mediaItem.productUrl);
+				} else if (mediaItem.mediaFile && mediaItem.mediaFile.baseUrl) {
+					$("#viewOnGooglePhotos").attr("href", mediaItem.mediaFile.baseUrl); // Fallback
+				} else {
+					$("#viewOnGooglePhotos").attr("href", "#");
+				}
+
+				$("#viewOnGooglePhotos").removeClass("text-gray-400 cursor-not-allowed").addClass("text-blue-600 hover:text-blue-800");
+
+				// Show YouTube upload button immediately
+				const btn = $("#uploadToYouTube");
+				btn.show();
+				btn.data('mediaItem', mediaItem);
+				btn.prop('disabled', false); // Ensure enabled
+				btn.text('📤 Upload to YouTube'); // Reset text
+			} else {
+				loadImageIntoImg("largeImg", mediaItem.mediaFile.baseUrl)
+				$("#uploadToYouTube").hide()
+			}
+			$("#modal").show()
+		} catch (err) {
+			console.error("Error in thumbnail click handler:", err);
+			logToPage(`Click Error: ${err.message}`, 'error');
+			alert("Error opening item details: " + err.message);
 		}
-		$("#modal").show()
-	} catch (err) {
-		console.error("Error in thumbnail click handler:", err);
-		logToPage(`Click Error: ${err.message}`, 'error');
-		alert("Error opening item details: " + err.message);
-	}
 	})
 
 
@@ -251,14 +252,10 @@
 		if (!title) return
 
 		const description = prompt('Enter video description (optional):', '')
-		
+
 		// POLICY: Unverified apps are locked to PRIVATE by YouTube.
 		// Asking for Public/Unlisted often leads to immediate deletion or "Locked Private" anyway.
 		const privacy = prompt('Enter privacy status (private recommended for unverified apps):', 'private')
-
-		// FINAL WARNING: YouTube policy checks
-		const confirmMessage = `⚠️ YOUTUBE POLICY NOTICE\n\n1. UNVERIFIED APP: Your video will likely be LOCKED to "Private" by YouTube automatically.\n2. NO DUPLICATES: If you upload the same file multiple times, YouTube will DELETE it as spam.\n\nProceed with upload?`;
-		if (!confirm(confirmMessage)) return
 
 		// Disable button and show loading
 		const button = $('#uploadToYouTube')
